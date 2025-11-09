@@ -17,6 +17,17 @@ from .utils.contexts import ClientContext
 from .utils.model_utils import Net, get_weights, set_weights, test, train
 
 
+def _model_size_bytes(parameters) -> int:
+    """Return total parameter size in bytes."""
+    total = 0
+    for tensor in parameters:
+        if hasattr(tensor, "nbytes"):
+            total += tensor.nbytes
+        elif hasattr(tensor, "size") and hasattr(tensor, "itemsize"):
+            total += tensor.size * tensor.itemsize
+    return total
+
+
 class FlowerClient(NumPyClient):
     def __init__(self, ctx: ClientContext, train_dataloader, eval_dataloader, metrics_collector):
         self.ctx = ctx
@@ -29,6 +40,13 @@ class FlowerClient(NumPyClient):
         # we can add batch size an quantization bits to config if needed
         local_epochs = config.get("local_epochs", self.ctx.client_cfg.local_epochs)
         learning_rate = config.get("learning_rate", self.ctx.client_cfg.learning_rate)
+
+        model_size_mb = _model_size_bytes(parameters) / (1024 * 1024)
+        recv_complete_ts = time.perf_counter()
+        server_dispatch_ts = config.get("server_dispatch_ts")
+        server_to_client_time = 0.0
+        if isinstance(server_dispatch_ts, (int, float)):
+            server_to_client_time = max(recv_complete_ts - server_dispatch_ts, 0.0)
 
         set_weights(self.net, parameters)
         tik = time.perf_counter()
@@ -44,11 +62,15 @@ class FlowerClient(NumPyClient):
             target_features=self.ctx.dataset_cfg.target_features,
         )
         tok = time.perf_counter()
+        client_upload_timestamp = time.perf_counter()
         metrics = OrderedDict(
             client=self.ctx.simple_id,
             computing_start_time=tik,
             computing_finish_time=tok,
-            loss=loss
+            loss=loss,
+            model_size_mb=model_size_mb,
+            server_to_client_time=server_to_client_time,
+            client_upload_timestamp=client_upload_timestamp,
         )
         debug(f"Training Metrics: {metrics}")
         info(f"Finished Training - Round {config['server-round']}")

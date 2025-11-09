@@ -18,6 +18,14 @@ def custom_fit_client(client, ins, timeout, group_id):
     fit_round_finish_time = time.perf_counter()
     fit_res.metrics["fit_start_time"] = fit_round_start_time
     fit_res.metrics["fit_finish_time"] = fit_round_finish_time
+    client_upload_ts = fit_res.metrics.get("client_upload_timestamp")
+    if isinstance(client_upload_ts, (int, float)):
+        fit_res.metrics["client_to_server_time"] = max(fit_round_finish_time - client_upload_ts, 0.0)
+    else:
+        fit_res.metrics["client_to_server_time"] = 0.0
+    fit_res.metrics.pop("client_upload_timestamp", None)
+    fit_res.metrics.setdefault("model_size_mb", 0.0)
+    fit_res.metrics.setdefault("server_to_client_time", 0.0)
     return client, fit_res
 
 

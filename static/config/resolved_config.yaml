@@ -1,0 +1,111 @@
+exp_name: my_experiment
+log_dir: static/logs/${exp_name}-${now:%m-%d_%H-%M-%S}
+fl_server:
+  log_to_stream: true
+  logging_level: INFO
+  strategy: FedAvg
+  min_fit_clients: ${net.fl.clients_number}
+  min_evaluate_clients: 1
+  min_available_clients: ${net.fl.clients_number}
+  num_rounds: 10
+  fraction_fit: 1.0
+  fraction_evaluate: 0.0
+  server_eval: false
+  val_batch_size: 128
+  server_param_init: true
+  stop_by_accuracy: false
+  accuracy_level: 0.8
+  collect_metrics: true
+  zmq:
+    enable: false
+    host: localhost
+    port: 5555
+  extra: {}
+fl_client:
+  log_to_stream: true
+  logging_level: INFO
+  train_batch_size: 32
+  val_batch_size: 128
+  local_epochs: 1
+  learning_rate: 0.001
+  log_interval: 100
+  collect_metrics: true
+  collect_metrics_interval: 10
+  zmq:
+    enable: true
+    host: localhost
+    port: 5555
+  extra: {}
+dataset:
+  path: static/data
+  name: cifar10
+  partitioner:
+    id: IidPartitioner
+    kwargs:
+      num_partitions: ${net.fl.clients_number}
+  force_create: false
+  test_size: 0.2
+  server_eval: ${fl_server.server_eval}
+  train_split_key: train
+  test_split_key: test
+  input_features:
+  - img
+  target_features:
+  - label
+net:
+  topology:
+    source: topohub
+    topohub_id: gabriel/5/0
+    custom_topology: null
+    link_util_key: deg
+    link_config: {}
+    switch_config:
+      failMode: standalone
+      stp: true
+    extra: {}
+  fl:
+    clients_number: 3
+    image: fleet-fl:latest
+    network: 10.0.0.0/16
+    server_placement:
+      id: highest_degree
+      kwargs: {}
+    client_placement:
+      id: lowest_degree
+      kwargs: {}
+    clients_limits:
+      distribution: homogeneous
+      cpu: 3.0
+      mem: 2048
+      cpu_mem_tuple: null
+    server_limits:
+      distribution: homogeneous
+      cpu: 3.0
+      mem: 4096
+      cpu_mem_tuple: null
+    extra: {}
+  bg:
+    enabled: false
+    image: fleet-bg:latest
+    network: 10.1.0.0/16
+    clients_limits:
+      distribution: homogeneous
+      cpu: 0.7
+      mem: 1024
+      cpu_mem_tuple: null
+    rate_distribution:
+      id: poisson
+      kwargs: {}
+    time_distribution:
+      id: poisson
+      kwargs: {}
+    generator:
+      id: iperf
+      kwargs: {}
+    extra: {}
+  sdn:
+    sdn_enabled: false
+    controller_ip: localhost
+    controller_port: 6633
+    controller_type: openflow
+    extra: {}

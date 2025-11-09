@@ -1,3 +1,4 @@
+import time
 from typing import List, Tuple
 
 from flwr.common import Metrics
@@ -61,7 +62,10 @@ def get_evaluate_fn(ctx, model):
 
 def on_fit_config_fn(server_round: int) -> dict:
     # https://github.com/adap/flower/issues/5596 to enhance this to be able to customize configs per client
-    return {'server-round': server_round}
+    return {
+        'server-round': server_round,
+        'server_dispatch_ts': time.perf_counter()
+    }
 
 
 def get_strategy(ctx: ServerContext, model: nn.Module) -> Strategy:
