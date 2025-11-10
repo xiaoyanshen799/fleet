@@ -1,7 +1,7 @@
 min_fit_clients: ${net.fl.clients_number}
 min_available_clients: ${net.fl.clients_number}
 min_evaluate_clients: 1
-num_rounds: 10
+num_rounds: 50
 fraction_fit: 1.0
 fraction_evaluate: 0.0
 server_eval: false

@@ -2,4 +2,4 @@
 .venv/
 static/logs
 static/log
-static/data
+static/data/cifar10

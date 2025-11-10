@@ -31,7 +31,14 @@ def server_fn(context: Context) -> ServerAppComponents:
         device=device
     )
 
-    strategy = get_strategy(ctx, model=Net())
+    strategy = get_strategy(
+        ctx,
+        model=Net(
+            num_classes=dataset_cfg.num_classes,
+            input_channels=dataset_cfg.input_channels,
+            image_size=dataset_cfg.image_size
+        )
+    )
     info(f"Using strategy: {strategy}")
     client_manager = MyClientManager(ctx)
     config = flwr.server.ServerConfig(num_rounds=server_cfg.num_rounds)

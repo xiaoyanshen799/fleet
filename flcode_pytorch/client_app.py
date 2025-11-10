@@ -31,7 +31,11 @@ def _model_size_bytes(parameters) -> int:
 class FlowerClient(NumPyClient):
     def __init__(self, ctx: ClientContext, train_dataloader, eval_dataloader, metrics_collector):
         self.ctx = ctx
-        self.net = Net()
+        self.net = Net(
+            num_classes=ctx.dataset_cfg.num_classes,
+            input_channels=ctx.dataset_cfg.input_channels,
+            image_size=ctx.dataset_cfg.image_size
+        )
         self.train_dataloader = train_dataloader
         self.eval_dataloader = eval_dataloader
         self.metrics_collector: MetricsCollector = metrics_collector
@@ -119,6 +123,9 @@ class FlowerClient(NumPyClient):
 
 
 def init_client(context: Context):
+    # torch.set_num_threads(1)
+    # # torch.set_num_interop_threads(1)
+
     client_cfg: FLClientConfig = get_configs_from_file(CONTAINER_RESOLVED_CONFIG_PATH, "fl_client", FLClientConfig)
     dataset_cfg: DatasetConfig = get_configs_from_file(CONTAINER_RESOLVED_CONFIG_PATH, "dataset", DatasetConfig)
     simple_id = context.node_config["cid"]

@@ -3,27 +3,41 @@ from collections import OrderedDict
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision.models import mobilenet_v2
 
 from common.loggers import info
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self, num_classes: int = 62, input_channels: int = 1, image_size: int = 96, width_mult: float = 1.0):
         super(Net, self).__init__()
-        self.conv1 = nn.Conv2d(3, 6, 5)
-        self.pool = nn.MaxPool2d(2, 2)
-        self.conv2 = nn.Conv2d(6, 16, 5)
-        self.fc1 = nn.Linear(16 * 5 * 5, 120)
-        self.fc2 = nn.Linear(120, 84)
-        self.fc3 = nn.Linear(84, 10)
+        self.target_hw = image_size
+        self.input_channels = input_channels
+        self.channel_proj = None
+        if input_channels not in (1, 3):
+            self.channel_proj = nn.Conv2d(input_channels, 3, kernel_size=1, bias=False)
+
+        backbone = mobilenet_v2(weights=None, width_mult=width_mult)
+        in_features = backbone.classifier[1].in_features
+        backbone.classifier[1] = nn.Linear(in_features, num_classes)
+        self.backbone = backbone
+
+    def _prepare_input(self, x: torch.Tensor) -> torch.Tensor:
+        if self.target_hw:
+            x = F.interpolate(x, size=(self.target_hw, self.target_hw), mode="bilinear", align_corners=False)
+
+        if x.shape[1] == 1:
+            x = x.repeat(1, 3, 1, 1)
+        elif x.shape[1] != 3:
+            if self.channel_proj is None:
+                self.channel_proj = nn.Conv2d(x.shape[1], 3, kernel_size=1, bias=False).to(x.device)
+            x = self.channel_proj(x)
+
+        return x
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
-        x = x.view(-1, 16 * 5 * 5)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        return self.fc3(x)
+        x = self._prepare_input(x)
+        return self.backbone(x)
 
 
 def train(
@@ -39,7 +53,7 @@ def train(
         **kwargs
 ):
     """Train the model for a number of epochs."""
-    optim = torch.optim.SGD(model.parameters(), lr=learning_rate)
+    optim = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9, weight_decay=1e-4)
     loss_fn = torch.nn.CrossEntropyLoss().to(device)
     model.to(device)
     model.train()

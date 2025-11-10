@@ -1,7 +1,10 @@
-name: "cifar10"
+name: "femnist"
 force_create: false
 server_eval: ${fl_server.server_eval}
 partitioner:
   id: IidPartitioner
   kwargs:
     num_partitions: ${net.fl.clients_number}
+num_classes: 62
+input_channels: 1
+image_size: 96

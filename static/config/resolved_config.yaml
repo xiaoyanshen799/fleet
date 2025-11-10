@@ -7,7 +7,7 @@ fl_server:
   min_fit_clients: ${net.fl.clients_number}
   min_evaluate_clients: 1
   min_available_clients: ${net.fl.clients_number}
-  num_rounds: 10
+  num_rounds: 50
   fraction_fit: 1.0
   fraction_evaluate: 0.0
   server_eval: false
@@ -27,7 +27,7 @@ fl_client:
   train_batch_size: 32
   val_batch_size: 128
   local_epochs: 1
-  learning_rate: 0.001
+  learning_rate: 0.05
   log_interval: 100
   collect_metrics: true
   collect_metrics_interval: 10
@@ -38,7 +38,7 @@ fl_client:
   extra: {}
 dataset:
   path: static/data
-  name: cifar10
+  name: femnist
   partitioner:
     id: IidPartitioner
     kwargs:
@@ -52,6 +52,9 @@ dataset:
   - img
   target_features:
   - label
+  num_classes: 62
+  input_channels: 1
+  image_size: 96
 net:
   topology:
     source: topohub
@@ -64,7 +67,7 @@ net:
       stp: true
     extra: {}
   fl:
-    clients_number: 3
+    clients_number: 20
     image: fleet-fl:latest
     network: 10.0.0.0/16
     server_placement:
@@ -75,15 +78,16 @@ net:
       kwargs: {}
     clients_limits:
       distribution: homogeneous
-      cpu: 3.0
+      cpu: 1.0
       mem: 2048
       cpu_mem_tuple: null
     server_limits:
       distribution: homogeneous
-      cpu: 3.0
+      cpu: 1.0
       mem: 4096
       cpu_mem_tuple: null
-    extra: {}
+    extra:
+      disable_gpu: true
   bg:
     enabled: false
     image: fleet-bg:latest

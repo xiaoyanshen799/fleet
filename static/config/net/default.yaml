@@ -5,17 +5,18 @@ topology:
   extra: { }
 
 fl:
-  clients_number: 3
+  clients_number: 20
   image: "fleet-fl:latest"
   network: "10.0.0.0/16"
   clients_limits:
-    cpu: 3.0
+    cpu: 1.0
     mem: 2048
     distribution: homogeneous
   server_limits:
-    cpu: 3.0
+    cpu: 1.0
     mem: 4096
-  extra: { }
+  extra: 
+    disable_gpu: true
 
 bg:
   enabled: false

@@ -22,6 +22,9 @@ class DatasetConfig:
     test_split_key: str = "test"
     input_features: list[str] = field(default_factory=lambda: ["img"])
     target_features: list[str] = field(default_factory=lambda: ["label"])
+    num_classes: int = 10
+    input_channels: int = 3
+    image_size: int = 32
 
 
 @dataclass

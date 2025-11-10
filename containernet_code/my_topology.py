@@ -332,9 +332,10 @@ class TopologyHandler:
         }
 
     def _get_gpu_configs(self) -> Dict:
+        disable_gpu = self.net_cfg.fl.extra.get("disable_gpu", False)
         return {
             "device_requests": [DeviceRequest(count=-1, capabilities=[['gpu']])],
-        } if self.gpu_available else {}
+        } if self.gpu_available and not disable_gpu else {}
 
     @staticmethod
     def check_gpu_available() -> bool:

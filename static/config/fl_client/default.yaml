@@ -1,7 +1,7 @@
 train_batch_size: 32
 val_batch_size: 128
 local_epochs: 1
-learning_rate: 0.001
+learning_rate: 0.05
 log_interval: 100
 collect_metrics: true
 collect_metrics_interval: 10
