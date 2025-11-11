@@ -52,8 +52,8 @@ def configure_logger(name: str, log_to_stream: bool = True, log_file: Optional[s
 
         logger = logging.getLogger(name)
         logger.setLevel(level.upper())
-        logger.propagate = False
-        logger.handlers.clear()
+        # logger.propagate = False
+        # logger.handlers.clear()
 
         # Shared header format using style='{'
         base_format = LOG_HEADER_TEMPLATE + " {message}"

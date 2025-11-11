@@ -149,11 +149,11 @@ if [[ ! -f ".venv/.torch_done" ]] || should_force torch; then
     confirm_step "Installing PyTorch (GPU if available, otherwise CPU)"
     if command -v nvidia-smi >/dev/null 2>&1; then
         echo "[+] NVIDIA GPU detected, installing CUDA-enabled torch"
-        pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cu118
+        pip install torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cu118
         TORCH_BASE="--index-url https://download.pytorch.org/whl/cu118"
     else
         echo "[*] No GPU detected, installing CPU-only torch"
-        pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cpu
+        pip install torch==2.7.0 torchvision==0.22.0 torchaudio==2.7.0 --index-url https://download.pytorch.org/whl/cpu
         TORCH_BASE="--index-url https://download.pytorch.org/whl/cpu"
     fi
     touch .venv/.torch_done

@@ -123,8 +123,8 @@ class FlowerClient(NumPyClient):
 
 
 def init_client(context: Context):
-    # torch.set_num_threads(1)
-    # # torch.set_num_interop_threads(1)
+    torch.set_num_threads(1)
+    torch.set_num_interop_threads(1)
 
     client_cfg: FLClientConfig = get_configs_from_file(CONTAINER_RESOLVED_CONFIG_PATH, "fl_client", FLClientConfig)
     dataset_cfg: DatasetConfig = get_configs_from_file(CONTAINER_RESOLVED_CONFIG_PATH, "dataset", DatasetConfig)
